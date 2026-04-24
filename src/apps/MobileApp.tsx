@@ -1,12 +1,23 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useWebSocket } from "../hooks/useWebSocket";
 import { useSessions } from "../hooks/useSessions";
 import { MobileMonitor } from "../components/mobile/MobileMonitor";
 import { MobileTalk } from "../components/mobile/MobileTalk";
 import { MobileStatus } from "../components/mobile/MobileStatus";
 import { MobileSettings } from "../components/mobile/MobileSettings";
-import { MobileConnect } from "../components/mobile/MobileConnect";
-import { getStoredHost } from "../lib/api";
+import { getStoredHost, setStoredHost } from "../lib/api";
+
+// Auto-detect maw host from the page's hostname (LAN access → same machine)
+// e.g. opened from http://10.20.1.138:5173 → maw is at http://10.20.1.138:3456
+function ensureHost() {
+  if (getStoredHost()) return;
+  const { hostname } = window.location;
+  const host = hostname === "localhost" || hostname === "127.0.0.1"
+    ? "localhost:3456"
+    : `http://${hostname}:3456`;
+  setStoredHost(host);
+}
+ensureHost();
 
 type Tab = "monitor" | "talk" | "status" | "settings";
 
@@ -23,12 +34,6 @@ export function MobileApp() {
 
   const { sessions, agents, eventLog, handleMessage } = useSessions();
   const { connected, reconnecting, send } = useWebSocket(handleMessage);
-
-  const hasHost = !!getStoredHost();
-
-  if (!hasHost && !connected) {
-    return <MobileConnect />;
-  }
 
   const goTalk = (name: string) => {
     setSelectedAgent(name);
