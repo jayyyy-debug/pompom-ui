@@ -21,6 +21,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, "index.html"),
+        mobile: resolve(__dirname, "mobile.html"),
         mission: resolve(__dirname, "mission.html"),
         fleet: resolve(__dirname, "fleet.html"),
         dashboard: resolve(__dirname, "dashboard.html"),
